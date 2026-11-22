@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مَهارة | منصة تبادل المهارات التشاركية - Skill-Swap Prototype</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme:
+        extend: {
+      colors: {
+        brand: {
+          cream: '#FAF8F5',
+            forest: '#1B4D3E',
+              forestDark: '#12382D',
+                forestLight: '#2D7D64',
+                  mint: '#EBF7F2',
+                    mintAccent: '#A7F3D0'
+        }
+      }
+    }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body
+  class="bg-[#FAF8F5] text-stone-800 antialiased selection:bg-[#1B4D3E] selection:text-white flex flex-col min-h-screen">
+
+  <!-- TOP PROTOTYPE AMBER WARNING BANNER -->
+  <div
+    class="bg-amber-400/90 text-amber-950 px-4 py-2 text-xs md:text-sm font-semibold flex items-center justify-center gap-2 border-b border-amber-500/40 shadow-sm shrink-0">
+    <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 text-amber-900"></i>
+    <span data-i18n="prototypeBanner">
+      تنبيه مهم قبل البدء: نموذج واجهة فقط بلا خوادم أو حسابات حقيقية أو بوابات دفع، وتخزين محلي عبر المتصفح
+      (localStorage)، ولوحة إشراف تجريبية.
+    </span>
+  </div>
+
+  <!-- MAIN APP CONTAINER -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div id="sidebar-overlay" onclick="app.toggleMobileSidebar(false)"
+      class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
+    <!-- SIDEBAR NAVIGATION (RTL: Right side, LTR: Left side) -->
+    <aside id="sidebar"
+      class="w-64 bg-white/95 backdrop-blur-md border-x border-stone-200/80 flex flex-col justify-between shrink-0 fixed md:static inset-y-0 z-50 transition-all duration-300 hidden md:flex shadow-sm">
+      <div class="p-5 flex flex-col gap-6">
+
+        <!-- Brand Identity -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3 cursor-pointer" onclick="app.setTab('dashboard')">
+            <div
+              class="w-10 h-10 rounded-xl bg-[#1B4D3E] text-white flex items-center justify-center shadow-md shadow-[#1B4D3E]/20">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h1 class="font-black text-xl text-[#1B4D3E] tracking-tight" data-i18n="brandName">مَهارة</h1>
+              <p class="text-[11px] text-stone-500 font-medium" data-i18n="brandSubtitle">تبادل المهارات</p>
+            </div>
+          </div>
+          <button onclick="app.toggleMobileSidebar(false)" class="md:hidden text-stone-400 hover:text-stone-700">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Primary Request Session CTA -->
+        <button onclick="app.setTab('skills')"
+          class="w-full py-2.5 px-4 rounded-xl bg-[#1B4D3E] text-white text-xs md:text-sm font-bold hover:bg-[#143B30] transition shadow-md shadow-[#1B4D3E]/25 flex items-center justify-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span data-i18n="newSessionBtn">+ طلب جلسة جديدة</span>
+        </button>
+
+        <!-- Navigation Links -->
+        <nav class="space-y-1.5 text-xs md:text-sm font-medium">
+          <button onclick="app.setTab('dashboard')" data-tab="dashboard"
+            class="nav-link active w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition">
+            <div class="flex items-center gap-3">
+              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+              <span data-i18n="navDashboard">الرئيسية</span>
+            </div>
+          </button>
+
+          <button onclick="app.setTab('skills')" data-tab="skills"
+            class="nav-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition">
+            <div class="flex items-center gap-3">
+              <i data-lucide="compass" class="w-4 h-4"></i>
+              <span data-i18n="navSkills">استكشاف المهارات</span>
+            </div>
+            <span id="nav-badge-skills"
+              class="badge-count px-2 py-0.5 rounded-full text-[11px] font-bold bg-stone-100 text-stone-600">12</span>
+          </button>
+
+          <button onclick="app.setTab('sessions')" data-tab="sessions"
+            class="nav-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition">
+            <div class="flex items-center gap-3">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+              <span data-i18n="navSessions">طلبات الجلسات</span>
+            </div>
+            <span id="nav-badge-sessions"
+              class="badge-count px-2 py-0.5 rounded-full text-[11px] font-bold bg-stone-100 text-stone-600">2</span>
+          </button>
+
+          <button onclick="app.setTab('wallet')" data-tab="wallet"
+            class="nav-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition">
+            <div class="flex items-center gap-3">
+              <i data-lucide="hourglass" class="w-4 h-4"></i>
+              <span data-i18n="navWallet">الرصيد التجريبي</span>
+            </div>
+          </button>
+
+          <button onclick="app.setTab('safety')" data-tab="safety"
+            class="nav-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition">
+            <div class="flex items-center gap-3">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+              <span data-i18n="navSafety">قواعد السلامة</span>
+            </div>
+          </button>
+
+          <button onclick="app.setTab('moderation')" data-tab="moderation"
+            class="nav-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition">
+            <div class="flex items-center gap-3">
+              <i data-lucide="shield-alert" class="w-4 h-4"></i>
+              <span data-i18n="navModeration">الإشراف على البلاغات</span>
+            </div>
+            <span id="nav-badge-moderation"
+              class="badge-count px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">1</span>
+          </button>
+
+          <button onclick="app.setTab('about')" data-tab="about"
+            class="nav-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition">
+            <div class="flex items-center gap-3">
+              <i data-lucide="help-circle" class="w-4 h-4"></i>
+              <span data-i18n="navAbout">عن النموذج</span>
+            </div>
+          </button>
+
+          <button onclick="app.setTab('notebook')" data-tab="notebook"
+            class="nav-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition">
+            <div class="flex items-center gap-3">
+              <i data-lucide="book-open-check" class="w-4 h-4 text-emerald-600"></i>
+              <span data-i18n="notebookTabNav">دفتر المشروع (Notebook)</span>
+            </div>
+            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">10
+              Slides</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Local Demo User Card at bottom -->
+      <div class="p-4 border-t border-stone-200/80 bg-stone-50/50">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-full bg-[#EBF7F2] text-[#1B4D3E] font-bold flex items-center justify-center border border-[#1B4D3E]/20 text-sm">
+            س.ز
+          </div>
+          <div class="overflow-hidden">
+            <h4 class="font-bold text-stone-800 text-xs truncate" data-i18n="demoUser">سامي الزهراني</h4>
+            <p class="text-[10px] text-stone-500 truncate" data-i18n="demoUserRole">حساب تجريبي محلي</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT WRAPPER -->
+    <div class="flex-1 flex flex-col h-full overflow-y-auto min-w-0">
+
+      <!-- TOP BAR: Language Switcher, Balance Pill, Reset Prototype CTA -->
+      <header
+        class="sticky top-0 z-30 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-stone-200/80 px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+
+        <!-- Mobile Toggle & Breadcrumbs -->
+        <div class="flex items-center gap-3">
+          <button onclick="app.toggleMobileSidebar(true)"
+            class="md:hidden p-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:bg-stone-50">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <div class="hidden sm:flex items-center gap-2 text-xs text-stone-500 font-medium">
+            <span class="text-[#1B4D3E] font-bold" data-i18n="brandName">مَهارة</span>
+            <span>/</span>
+            <span id="top-current-tab-label" data-i18n="navDashboard">الرئيسية</span>
+          </div>
+        </div>
+
+        <!-- Right Controls: Language Switcher & Quick Balance -->
+        <div class="flex items-center gap-2 md:gap-3">
+
+          <!-- Language Switcher (AR, EN, FR, ZGH) -->
+          <div class="flex items-center bg-white p-1 rounded-xl border border-stone-200 shadow-sm text-xs font-bold">
+            <button onclick="app.applyLanguage('ar')" data-lang="ar"
+              class="lang-btn px-2.5 py-1 rounded-lg transition">العربية</button>
+            <button onclick="app.applyLanguage('en')" data-lang="en"
+              class="lang-btn px-2.5 py-1 rounded-lg transition">EN</button>
+            <button onclick="app.applyLanguage('fr')" data-lang="fr"
+              class="lang-btn px-2.5 py-1 rounded-lg transition">FR</button>
+            <button onclick="app.applyLanguage('zgh')" data-lang="zgh"
+              class="lang-btn px-2.5 py-1 rounded-lg transition">ⵜⵉⴼⵉⵏⴰⵖ</button>
+          </div>
+
+          <!-- Quick Balance Pill -->
+          <button onclick="app.setTab('wallet')"
+            class="hidden sm:flex items-center gap-1.5 bg-[#EBF7F2] text-[#1B4D3E] px-3 py-1.5 rounded-xl border border-[#C8E6C9] text-xs font-bold hover:bg-[#d8f0e5] transition">
+            <i data-lucide="hourglass" class="w-3.5 h-3.5"></i>
+            <span id="top-bar-hours">105</span>
+            <span data-i18n="durationHours">ساعات</span>
+          </button>
+
+          <!-- Reset Prototype Quick Action -->
+          <button onclick="app.openResetModal()" title="Reset Prototype"
+            class="p-2 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 transition">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW PANELS (SPA TABS) -->
+      <main class="flex-1 p-4 md:p-8 space-y-8 max-w-7xl w-full mx-auto">
+
+        <!-- ============================================== -->
+        <!-- TAB 1: MAIN DASHBOARD & LIVE ANALYTICS         -->
+        <!-- ============================================== -->
+        <section id="tab-dashboard" class="tab-content space-y-8">
+
+          <!-- HERO BANNER (Matches uploaded blueprint image) -->
+          <div
+            class="hero-forest-bg text-white rounded-3xl p-6 md:p-10 shadow-xl border border-[#2D7D64]/30 flex flex-col lg:flex-row items-center justify-between gap-8">
+
+            <!-- Left (RTL: Right) text content -->
+            <div class="space-y-4 max-w-xl z-10">
+              <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-emerald-300 border border-white/15">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                <span data-i18n="heroTag">نظام بنك الوقت المحلي</span>
+              </div>
+
+              <h2 class="text-2xl md:text-4xl font-black leading-tight tracking-tight text-white" data-i18n="heroTitle">
+                تعلّم مهارة، وشارك ما تُتقنه.
+              </h2>
+
+              <p class="text-white/80 text-xs md:text-sm leading-relaxed" data-i18n="heroDesc">
+                جرّب كيف يبدو تبادل المهارات دون وساطة مالية: ساعة تعليم تُعطيك ساعة تعلّم. اكتشف مهارات مجتمعك، اطلب
+                جلسات تجريبية، وتابع رصيدك المحلي لحظة بلحظة.
+              </p>
+
+              <!-- CTAs -->
+              <div class="flex items-center gap-3 pt-2 flex-wrap">
+                <button onclick="app.setTab('skills')"
+                  class="px-5 py-2.5 rounded-xl bg-white text-[#1B4D3E] text-xs md:text-sm font-bold hover:bg-emerald-50 transition shadow-lg flex items-center gap-2">
+                  <i data-lucide="compass" class="w-4 h-4"></i>
+                  <span data-i18n="heroCtaSkills">استكشاف المهارات</span>
+                </button>
+                <button onclick="app.setTab('about')"
+                  class="px-5 py-2.5 rounded-xl bg-white/10 backdrop-blur-md text-white text-xs md:text-sm font-semibold hover:bg-white/20 transition border border-white/20 flex items-center gap-2">
+                  <i data-lucide="info" class="w-4 h-4"></i>
+                  <span data-i18n="heroCtaHow">كيف يعمل النموذج؟</span>
+                </button>
+              </div>
+
+              <!-- Community Tag -->
+              <div class="pt-4 flex items-center gap-3 text-xs text-white/70">
+                <div class="flex -space-x-2 overflow-hidden rtl:space-x-reverse">
+                  <img class="inline-block h-7 w-7 rounded-full ring-2 ring-[#1B4D3E]"
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80"
+                    alt="">
+                  <img class="inline-block h-7 w-7 rounded-full ring-2 ring-[#1B4D3E]"
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80"
+                    alt="">
+                  <img class="inline-block h-7 w-7 rounded-full ring-2 ring-[#1B4D3E]"
+                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&auto=format&fit=crop&q=80"
+                    alt="">
+                </div>
+                <div>
+                  <strong class="text-white block font-bold" data-i18n="heroVolunteers">مجتمع تدريس متطوع</strong>
+                  <span data-i18n="heroVolunteersSub">١٢٠ ساعة تدريب مسجلة في هذا الجهاز</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right (RTL: Left) Embedded Wallet Widget inside Hero -->
+            <div
+              class="w-full lg:w-80 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-white space-y-4 shadow-2xl z-10">
+              <div class="flex items-center justify-between border-b border-white/15 pb-3">
+                <span class="text-xs font-semibold text-emerald-200" data-i18n="heroWalletBalance">رصيد تجريبي</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 font-bold"
+                  data-i18n="heroRecentSkillTag">١٢ مهارة متاحة</span>
+              </div>
+
+              <div>
+                <div class="flex items-baseline gap-2">
+                  <span id="hero-wallet-available" class="text-4xl md:text-5xl font-black tracking-tight">105</span>
+                  <span class="text-sm font-bold text-emerald-200" data-i18n="heroWalletHours">رصيد</span>
+                </div>
+                <p class="text-[11px] text-white/70 mt-1" data-i18n="heroWalletDesc">يعتمد مقياس التجربة على 1 ساعة = 1
+                  رصيد</p>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/15 text-center text-xs">
+                <div class="bg-black/20 p-2 rounded-xl">
+                  <span class="text-[10px] text-white/70 block" data-i18n="heroEscrowLabel">ضمان</span>
+                  <strong id="hero-wallet-escrow" class="text-amber-300 font-bold text-sm">3</strong>
+                </div>
+                <div class="bg-black/20 p-2 rounded-xl">
+                  <span class="text-[10px] text-white/70 block" data-i18n="heroSessionsLabel">جلسات</span>
+                  <strong id="hero-wallet-sessions" class="text-emerald-300 font-bold text-sm">2</strong>
+                </div>
+                <div class="bg-black/20 p-2 rounded-xl">
+                  <span class="text-[10px] text-white/70 block" data-i18n="heroSpentLabel">مستهلك</span>
+                  <strong id="hero-wallet-consumed" class="text-stone-300 font-bold text-sm">12</strong>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 pt-1">
+                <button onclick="app.setTab('wallet')"
+                  class="flex-1 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition text-center"
+                  data-i18n="heroManageBalance">
+                  إدارة الرصيد
+                </button>
+                <button onclick="app.add50Hours()"
+                  class="py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition flex items-center justify-center gap-1 shadow-sm"
+                  data-i18n="heroQuickAdd">
+                  + شحن
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- LIVE METRICS COUNTERS (Calculated dynamically from localStorage) -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-bold text-stone-900 text-lg md:text-xl" data-i18n="statsHeading">أرقام حقيقية من بياناتك
+                </h3>
+                <p class="text-xs text-stone-500" data-i18n="statsSubheading">هذه الإحصاءات تُحسب مباشرة من المهارات
+                  والطلبات وساعات التجربة المخزنة في هذا المتصفح.</p>
+              </div>
+              <button onclick="app.setTab('about')" class="text-xs text-[#1B4D3E] font-bold hover:underline"
+                data-i18n="statsHowCalculated">كيف تُحسب الإحصاءات؟</button>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <!-- Available Skills -->
+              <div onclick="app.setTab('skills')" class="glass-card glass-card-hover p-5 rounded-2xl cursor-pointer">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-xs text-stone-500 font-medium" data-i18n="statAvailableSkills">مهارات متاحة</span>
+                  <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                    <i data-lucide="book-open" class="w-4 h-4"></i>
+                  </div>
+                </div>
+                <div id="stat-available-skills" class="text-2xl md:text-3xl font-black text-stone-900 mb-1">12</div>
+                <p id="stat-available-skills-sub" class="text-[11px] text-stone-400">من أصل 12 مهارة في النموذج</p>
+              </div>
+
+              <!-- Active Sessions -->
+              <div onclick="app.setTab('sessions')" class="glass-card glass-card-hover p-5 rounded-2xl cursor-pointer">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-xs text-stone-500 font-medium" data-i18n="statActiveSessions">طلبات نشطة</span>
+                  <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+                    <i data-lucide="clock" class="w-4 h-4"></i>
+                  </div>
+                </div>
+                <div id="stat-active-sessions" class="text-2xl md:text-3xl font-black text-amber-700 mb-1">2</div>
+                <p class="text-[11px] text-stone-400" data-i18n="statActiveSessionsSub">قيد الانتظار أو مؤكدة</p>
+              </div>
+
+              <!-- Completed Sessions -->
+              <div onclick="app.setTab('sessions')" class="glass-card glass-card-hover p-5 rounded-2xl cursor-pointer">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-xs text-stone-500 font-medium" data-i18n="statCompletedSessions">جلسات مكتملة</span>
+                  <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+                    <i data-lucide="badge-check" class="w-4 h-4"></i>
+                  </div>
+                </div>
+                <div id="stat-completed-sessions" class="text-2xl md:text-3xl font-black text-blue-800 mb-1">1</div>
+                <p class="text-[11px] text-stone-400" data-i18n="statCompletedSessionsSub">تمت بنجاح وحُسبت على الجهاز
+                </p>
+              </div>
+
+              <!-- Open Reports -->
+              <div onclick="app.setTab('moderation')"
+                class="glass-card glass-card-hover p-5 rounded-2xl cursor-pointer">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-xs text-stone-500 font-medium" data-i18n="statOpenReports">بلاغات مفتوحة</span>
+                  <div class="w-8 h-8 rounded-lg bg-red-50 text-red-700 flex items-center justify-center">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                  </div>
+                </div>
+                <div id="stat-open-reports" class="text-2xl md:text-3xl font-black text-red-700 mb-1">1</div>
+                <p class="text-[11px] text-stone-400" data-i18n="statOpenReportsSub">بانتظار مراجعة الإشراف التجريبي</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAST JUMP NAVIGATION ("Every part in its place" / "كل جزء في مكانه") -->
+          <div class="space-y-4">
+            <div>
+              <h3 class="font-bold text-stone-900 text-lg md:text-xl" data-i18n="jumpTitle">كل جزء، في مكانه</h3>
+              <p class="text-xs text-stone-500" data-i18n="jumpSubtitle">أقسام منسقة وواضحة، لكل منها صفحة وإجراء رئيسي.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+
+              <!-- Jump Skills -->
+              <div onclick="app.setTab('skills')"
+                class="glass-card glass-card-hover p-4 rounded-2xl cursor-pointer flex flex-col justify-between">
+                <div>
+                  <div class="w-8 h-8 rounded-lg bg-emerald-50 text-[#1B4D3E] flex items-center justify-center mb-3">
+                    <i data-lucide="compass" class="w-4 h-4"></i>
+                  </div>
+                  <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="jumpSkills">استكشاف المهارات</h4>
+                  <p class="text-[11px] text-stone-500 leading-snug" data-i18n="jumpSkillsDesc">تصفّح وسائط المهارات،
+                    اختر المناسب، واطلب جلسة.</p>
+                </div>
+                <span class="text-[11px] font-bold text-[#1B4D3E] pt-3 flex items-center gap-1"
+                  data-i18n="jumpOpenSection">فتح القسم ←</span>
+              </div>
+
+              <!-- Jump Sessions -->
+              <div onclick="app.setTab('sessions')"
+                class="glass-card glass-card-hover p-4 rounded-2xl cursor-pointer flex flex-col justify-between">
+                <div>
+                  <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center mb-3">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                  </div>
+                  <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="jumpSessions">طلبات الجلسات</h4>
+                  <p class="text-[11px] text-stone-500 leading-snug" data-i18n="jumpSessionsDesc">تابع الطلبات، أكّدها
+                    أو ألغها واسترجع الساعات فوراً.</p>
+                </div>
+                <span class="text-[11px] font-bold text-[#1B4D3E] pt-3 flex items-center gap-1"
+                  data-i18n="jumpOpenSection">فتح القسم ←</span>
+              </div>
+
+              <!-- Jump Wallet -->
+              <div onclick="app.setTab('wallet')"
+                class="glass-card glass-card-hover p-4 rounded-2xl cursor-pointer flex flex-col justify-between">
+                <div>
+                  <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
+                    <i data-lucide="hourglass" class="w-4 h-4"></i>
+                  </div>
+                  <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="jumpWallet">الرصيد التجريبي</h4>
+                  <p class="text-[11px] text-stone-500 leading-snug" data-i18n="jumpWalletDesc">اضبط رصيدك، جرّب إضافة
+                    الساعات، وراقب سجل الحركات.</p>
+                </div>
+                <span class="text-[11px] font-bold text-[#1B4D3E] pt-3 flex items-center gap-1"
+                  data-i18n="jumpOpenSection">فتح القسم ←</span>
+              </div>
+
+              <!-- Jump Safety -->
+              <div onclick="app.setTab('safety')"
+                class="glass-card glass-card-hover p-4 rounded-2xl cursor-pointer flex flex-col justify-between">
+                <div>
+                  <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center mb-3">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                  </div>
+                  <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="jumpSafety">قواعد السلامة</h4>
+                  <p class="text-[11px] text-stone-500 leading-snug" data-i18n="jumpSafetyDesc">إرشادات قبل الجلسات
+                    وأثناءها وبعدها، ونموذج إبلاغ سريع.</p>
+                </div>
+                <span class="text-[11px] font-bold text-[#1B4D3E] pt-3 flex items-center gap-1"
+                  data-i18n="jumpOpenSection">فتح القسم ←</span>
+              </div>
+
+              <!-- Jump Moderation -->
+              <div onclick="app.setTab('moderation')"
+                class="glass-card glass-card-hover p-4 rounded-2xl cursor-pointer flex flex-col justify-between">
+                <div>
+                  <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center mb-3">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                  </div>
+                  <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="jumpModeration">الإشراف على البلاغات</h4>
+                  <p class="text-[11px] text-stone-500 leading-snug" data-i18n="jumpModerationDesc">راجع البلاغات، غيّر
+                    حالتها، وتفقّد آلية المراجعة المحلية.</p>
+                </div>
+                <span class="text-[11px] font-bold text-[#1B4D3E] pt-3 flex items-center gap-1"
+                  data-i18n="jumpOpenSection">فتح القسم ←</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- LOWER SPLIT GRID: Featured Skills & Widgets -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
+            <!-- Left 2 Cols: Suggested Skills Preview -->
+            <div class="lg:col-span-2 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-bold text-stone-900 text-lg" data-i18n="suggestedHeading">مهارات مقترحة</h3>
+                  <p class="text-xs text-stone-500" data-i18n="suggestedSubheading">مختارة لك من مخزون النموذج التجريبي
+                  </p>
+                </div>
+                <button onclick="app.setTab('skills')" class="text-xs font-bold text-[#1B4D3E] hover:underline"
+                  data-i18n="viewAll">عرض الكل ←</button>
+              </div>
+
+              <div id="dashboard-suggested-skills" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Dynamically injected via JS -->
+              </div>
+            </div>
+
+            <!-- Right 1 Col: Upcoming Sessions & Safety First card -->
+            <div class="space-y-6">
+
+              <!-- Upcoming Sessions Widget -->
+              <div class="glass-card p-5 rounded-2xl space-y-4">
+                <div class="flex items-center justify-between">
+                  <h4 class="font-bold text-stone-900 text-sm flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-4 h-4 text-[#1B4D3E]"></i>
+                    <span data-i18n="upcomingHeading">جلساتك القادمة</span>
+                  </h4>
+                  <button onclick="app.setTab('sessions')" class="text-[11px] text-[#1B4D3E] font-bold hover:underline"
+                    data-i18n="viewAll">عرض الكل</button>
+                </div>
+
+                <div id="dashboard-upcoming-sessions" class="space-y-2.5">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <!-- Safety First Box -->
+              <div
+                class="glass-card p-5 rounded-2xl border-emerald-100 bg-gradient-to-br from-white via-white to-emerald-50/40 space-y-3">
+                <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                  <span data-i18n="safetyCardTitle">السلامة أولاً</span>
+                </div>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="safetyCardDesc">
+                  النموذج مصمم لتذكيرك بالمحافظة على بيئة تعليمية آمنة في كل خطوة:
+                </p>
+                <ul class="text-xs text-stone-500 space-y-1.5 list-disc list-inside">
+                  <li data-i18n="safetyPoint1">لا تشارك كلمات المرور أو حساباتك البنكية.</li>
+                  <li data-i18n="safetyPoint2">استخدم منصات تواصل موثوقة للجلسات.</li>
+                  <li data-i18n="safetyPoint3">أبلغ الإشراف فوراً عن أي سلوك مريب.</li>
+                </ul>
+                <button onclick="app.setTab('safety')"
+                  class="text-xs font-bold text-[#1B4D3E] hover:underline block pt-2" data-i18n="readSafetyRules">
+                  اقرأ قواعد السلامة ←
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 2: SKILL DISCOVERY & BOOKING ENGINE        -->
+        <!-- ============================================== -->
+        <section id="tab-skills" class="tab-content hidden space-y-6">
+          <div class="space-y-1">
+            <h2 class="text-2xl font-black text-stone-900" data-i18n="skillsPageTitle">دليل المهارات التشاركية</h2>
+            <p class="text-xs md:text-sm text-stone-500" data-i18n="skillsPageDesc">ابحث في المهارات المتوفرة، فلتر حسب
+              المستوى والتصنيف، واطلب جلسة تعليمية فورية باستخدام رصيدك من الساعات.</p>
+          </div>
+
+          <!-- Filters & Search Toolbar -->
+          <div class="glass-card p-4 rounded-2xl flex flex-col md:flex-row gap-3 items-center justify-between">
+
+            <!-- Search bar -->
+            <div class="relative w-full md:w-96">
+              <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute top-1/2 -translate-y-1/2 start-3.5"></i>
+              <input id="skills-search-input" type="text" data-i18n-placeholder="searchPlaceholder"
+                placeholder="ابحث بالمهارة، اسم المعلم، أو الكلمات المفتاحية..."
+                class="w-full ps-10 pe-4 py-2.5 bg-white border border-stone-200 rounded-xl text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-[#1B4D3E]/30 focus:border-[#1B4D3E] transition">
+            </div>
+
+            <!-- Dropdown Filters -->
+            <div class="flex items-center gap-2 w-full md:w-auto flex-wrap sm:flex-nowrap">
+
+              <!-- Category Filter -->
+              <select id="skills-category-select"
+                class="flex-1 sm:flex-none py-2.5 px-3 bg-white border border-stone-200 rounded-xl text-xs font-medium text-stone-700 focus:outline-none focus:ring-2 focus:ring-[#1B4D3E]/30">
+                <option value="all" data-i18n="filterCategoryAll">جميع التصنيفات</option>
+                <option value="languages" data-i18n="filterCatLanguages">اللغات</option>
+                <option value="tech" data-i18n="filterCatTech">البرمجة والتقنية</option>
+                <option value="arts" data-i18n="filterCatArts">الفنون والتصميم</option>
+                <option value="music" data-i18n="filterCatMusic">الموسيقى والصوت</option>
+                <option value="cooking" data-i18n="filterCatCooking">الطبخ والحرف</option>
+                <option value="business" data-i18n="filterCatBusiness">الأعمال والأكاديمي</option>
+              </select>
+
+              <!-- Level Filter -->
+              <select id="skills-level-select"
+                class="flex-1 sm:flex-none py-2.5 px-3 bg-white border border-stone-200 rounded-xl text-xs font-medium text-stone-700 focus:outline-none focus:ring-2 focus:ring-[#1B4D3E]/30">
+                <option value="all" data-i18n="filterLevelAll">جميع المستويات</option>
+                <option value="beginner" data-i18n="levelBeginner">مبتدئ</option>
+                <option value="expert" data-i18n="levelExpert">خبير</option>
+                <option value="legend" data-i18n="levelLegend">أسطورة</option>
+              </select>
+
+              <!-- Sort Filter -->
+              <select id="skills-sort-select"
+                class="flex-1 sm:flex-none py-2.5 px-3 bg-white border border-stone-200 rounded-xl text-xs font-medium text-stone-700 focus:outline-none focus:ring-2 focus:ring-[#1B4D3E]/30">
+                <option value="newest" data-i18n="sortNewest">الأحدث إضافة</option>
+                <option value="rating" data-i18n="sortRating">الأعلى تقييماً</option>
+                <option value="durationAsc" data-i18n="sortDurationAsc">الأقصر مدة</option>
+                <option value="durationDesc" data-i18n="sortDurationDesc">الأطول مدة</option>
+              </select>
+
+            </div>
+          </div>
+
+          <!-- Results count feedback -->
+          <div class="text-xs text-stone-500 px-1 font-medium" id="skills-results-count">
+            تم العثور على 12 مهارة
+          </div>
+
+          <!-- Skills Directory Grid -->
+          <div id="skills-directory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Rendered by app.renderSkills() -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 3: SESSIONS MANAGEMENT                     -->
+        <!-- ============================================== -->
+        <section id="tab-sessions" class="tab-content hidden space-y-6">
+          <div class="space-y-1">
+            <h2 class="text-2xl font-black text-stone-900" data-i18n="sessionsPageTitle">إدارة طلبات الجلسات</h2>
+            <p class="text-xs md:text-sm text-stone-500" data-i18n="sessionsPageDesc">تتبع كل جلساتك التعليمية خطوة
+              بخطوة. يتم استرداد الساعات المحجوزة تلقائياً إلى رصيدك في حال إلغاء الجلسة.</p>
+          </div>
+
+          <!-- Status Tabs -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-stone-200 text-xs font-bold">
+            <button data-status="all"
+              class="sess-filter-btn px-4 py-2 rounded-xl bg-[#1B4D3E] text-white shadow-sm transition flex items-center gap-1.5 whitespace-nowrap">
+              <span data-i18n="tabAll">الكل</span>
+              <span id="sess-tab-count-all" class="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">3</span>
+            </button>
+            <button data-status="pending"
+              class="sess-filter-btn px-4 py-2 rounded-xl text-stone-600 hover:bg-stone-100 transition flex items-center gap-1.5 whitespace-nowrap">
+              <span data-i18n="tabPending">قيد الانتظار</span>
+              <span id="sess-tab-count-pending" class="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-200">1</span>
+            </button>
+            <button data-status="confirmed"
+              class="sess-filter-btn px-4 py-2 rounded-xl text-stone-600 hover:bg-stone-100 transition flex items-center gap-1.5 whitespace-nowrap">
+              <span data-i18n="tabConfirmed">مؤكدة</span>
+              <span id="sess-tab-count-confirmed" class="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-200">1</span>
+            </button>
+            <button data-status="completed"
+              class="sess-filter-btn px-4 py-2 rounded-xl text-stone-600 hover:bg-stone-100 transition flex items-center gap-1.5 whitespace-nowrap">
+              <span data-i18n="tabCompleted">مكتملة</span>
+              <span id="sess-tab-count-completed" class="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-200">1</span>
+            </button>
+            <button data-status="cancelled"
+              class="sess-filter-btn px-4 py-2 rounded-xl text-stone-600 hover:bg-stone-100 transition flex items-center gap-1.5 whitespace-nowrap">
+              <span data-i18n="tabCancelled">ملغاة</span>
+              <span id="sess-tab-count-cancelled" class="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-200">0</span>
+            </button>
+          </div>
+
+          <!-- Sessions Cards Feed -->
+          <div id="sessions-list-container" class="space-y-4">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 4: TIME-ESCROW & WALLET SYSTEM             -->
+        <!-- ============================================== -->
+        <section id="tab-wallet" class="tab-content hidden space-y-8">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1">
+              <h2 class="text-2xl font-black text-stone-900" data-i18n="walletPageTitle">الرصيد الزمني وحساب الضمان
+                (Time-Escrow)</h2>
+              <p class="text-xs md:text-sm text-stone-500" data-i18n="walletPageDesc">في منصة مهارة، الوقت هو العملة
+                الوحيدة: كل ساعة تعلّم يقابلها ساعة تدريس، وتخضع الطلبات لنظام حجز الضمان لحماية الطرفين.</p>
+            </div>
+
+            <!-- Quick Top-up Button -->
+            <button onclick="app.add50Hours()"
+              class="py-2.5 px-5 rounded-xl bg-[#1B4D3E] text-white text-xs md:text-sm font-bold hover:bg-[#143B30] transition shadow-md flex items-center justify-center gap-2 shrink-0">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span data-i18n="walletAdd50Btn">+ شحن 50 ساعة تجريبية مجانية</span>
+            </button>
+          </div>
+
+          <!-- 4 Stat Breakdown Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-card p-5 rounded-2xl border-emerald-200 bg-emerald-50/20">
+              <span class="text-xs font-semibold text-emerald-800 block mb-2" data-i18n="walletAvailableTitle">الرصيد
+                المتاح للاستخدام</span>
+              <div class="flex items-baseline gap-2">
+                <span id="wallet-val-available" class="text-3xl font-black text-[#1B4D3E]">105</span>
+                <span class="text-xs text-stone-500 font-medium" data-i18n="durationHours">ساعات</span>
+              </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl border-amber-200 bg-amber-50/20">
+              <span class="text-xs font-semibold text-amber-800 block mb-2" data-i18n="walletEscrowTitle">رصيد الضمان
+                المحجوز</span>
+              <div class="flex items-baseline gap-2">
+                <span id="wallet-val-escrow" class="text-3xl font-black text-amber-700">3</span>
+                <span class="text-xs text-stone-500 font-medium" data-i18n="durationHours">ساعات</span>
+              </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl">
+              <span class="text-xs font-semibold text-stone-600 block mb-2" data-i18n="walletAddedTitle">إجمالي الساعات
+                المكتسبة</span>
+              <div class="flex items-baseline gap-2">
+                <span id="wallet-val-added" class="text-3xl font-black text-stone-800">120</span>
+                <span class="text-xs text-stone-500 font-medium" data-i18n="durationHours">ساعات</span>
+              </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl">
+              <span class="text-xs font-semibold text-stone-600 block mb-2" data-i18n="walletConsumedTitle">إجمالي
+                الساعات المستهلكة</span>
+              <div class="flex items-baseline gap-2">
+                <span id="wallet-val-consumed" class="text-3xl font-black text-stone-800">12</span>
+                <span class="text-xs text-stone-500 font-medium" data-i18n="durationHours">ساعات</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transaction Ledger Table -->
+          <div class="glass-card rounded-2xl overflow-hidden border border-stone-200/80 shadow-sm space-y-4 p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-100">
+              <h3 class="font-bold text-stone-900 text-base flex items-center gap-2">
+                <i data-lucide="receipt" class="w-4 h-4 text-[#1B4D3E]"></i>
+                <span data-i18n="walletLedgerTitle">سجل العمليات الزمنية (Ledger)</span>
+              </h3>
+
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-stone-500 font-medium" data-i18n="walletLedgerFilter">تصفية السجل:</span>
+                <select id="ledger-filter-select"
+                  class="py-1.5 px-3 bg-white border border-stone-200 rounded-lg text-xs font-semibold text-stone-700 focus:outline-none">
+                  <option value="all" data-i18n="walletLedgerAll">جميع العمليات</option>
+                  <option value="deposit" data-i18n="walletLedgerDeposit">إيداع وشحن</option>
+                  <option value="escrow" data-i18n="walletLedgerEscrow">حجز ضمان</option>
+                  <option value="refund" data-i18n="walletLedgerRefund">استرداد حجز</option>
+                  <option value="consume" data-i18n="walletLedgerConsume">استهلاك وإتمام</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-start border-collapse">
+                <thead>
+                  <tr class="border-b border-stone-200 text-xs text-stone-400 font-semibold text-start">
+                    <th class="py-2.5 px-4 text-start font-bold" data-i18n="ledgerColDate">التاريخ</th>
+                    <th class="py-2.5 px-4 text-start font-bold" data-i18n="ledgerColType">نوع العملية</th>
+                    <th class="py-2.5 px-4 text-start font-bold" data-i18n="ledgerColDescription">البيان والوصف</th>
+                    <th class="py-2.5 px-4 text-end font-bold" data-i18n="ledgerColAmount">المقدار الزمني</th>
+                  </tr>
+                </thead>
+                <tbody id="wallet-ledger-rows">
+                  <!-- Dynamically populated by app.renderWallet() -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 5: SAFETY RULES & ISSUE REPORTING          -->
+        <!-- ============================================== -->
+        <section id="tab-safety" class="tab-content hidden space-y-8">
+          <div class="space-y-1">
+            <h2 class="text-2xl font-black text-stone-900" data-i18n="safetyPageTitle">قواعد السلامة وميثاق المجتمع</h2>
+            <p class="text-xs md:text-sm text-stone-500" data-i18n="safetyPageDesc">منصة مهارة قائمة على الاحترام
+              المتبادل والثقة. التزامك بهذه الإرشادات يضمن تجربة تعليمية ممتعة وآمنة للجميع.</p>
+          </div>
+
+          <!-- 3 Stages Guidelines Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <!-- Stage 1: Before -->
+            <div class="glass-card p-6 rounded-2xl border-t-4 border-t-emerald-600 space-y-4">
+              <div
+                class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-lg">
+                ١
+              </div>
+              <h3 class="font-bold text-stone-900 text-base" data-i18n="safetyStageBeforeTitle">١. قبل الجلسة (التحضير
+                والتواصل)</h3>
+              <ul class="space-y-3 text-xs text-stone-600 leading-relaxed">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+                  <span data-i18n="safetyStageBefore1">تواصل فقط عبر الوسائل المتفق عليها ولا تفصح عن معلومات شخصية
+                    حساسة أو عناوين منزلك.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+                  <span data-i18n="safetyStageBefore2">اتفق بوضوح مسبقاً على محاور الجلسة والبرامج التي ستستخدمونها
+                    أثناء الشرح.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+                  <span data-i18n="safetyStageBefore3">تأكد من شروط الجلسة والمدة المطلوبة وتوافر رصيدك في حساب
+                    الضمان.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Stage 2: During -->
+            <div class="glass-card p-6 rounded-2xl border-t-4 border-t-blue-600 space-y-4">
+              <div
+                class="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-lg">
+                ٢
+              </div>
+              <h3 class="font-bold text-stone-900 text-base" data-i18n="safetyStageDuringTitle">٢. أثناء الجلسة (السلوك
+                والاحترام)</h3>
+              <ul class="space-y-3 text-xs text-stone-600 leading-relaxed">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-blue-600 shrink-0 mt-0.5"></i>
+                  <span data-i18n="safetyStageDuring1">التزم بموعد البدء والانتهاء المحددين احتراماً لوقت المتعلم
+                    والمعلم.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-blue-600 shrink-0 mt-0.5"></i>
+                  <span data-i18n="safetyStageDuring2">حافظ على لغة تواصل مهنية ولائقة وامتنع تماماً عن أي مضايقات أو
+                    محتوى غير لائق.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-blue-600 shrink-0 mt-0.5"></i>
+                  <span data-i18n="safetyStageDuring3">في حال حدوث أي تصرف مسيء، أنهِ الاتصال فوراً وتوجه لنموذج الإبلاغ
+                    المباشر.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Stage 3: After -->
+            <div class="glass-card p-6 rounded-2xl border-t-4 border-t-amber-600 space-y-4">
+              <div
+                class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-lg">
+                ٣
+              </div>
+              <h3 class="font-bold text-stone-900 text-base" data-i18n="safetyStageAfterTitle">٣. بعد الجلسة (التأكيد
+                والتقييم)</h3>
+              <ul class="space-y-3 text-xs text-stone-600 leading-relaxed">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                  <span data-i18n="safetyStageAfter1">قم بتأكيد اكتمال الجلسة لنقل الساعات المحجوزة من الضمان إلى رصيد
+                    المعلم.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                  <span data-i18n="safetyStageAfter2">اترك تقييماً بناءً وصادقاً يساعد بقية الأعضاء في اختيار جلساتهم
+                    القادمة.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                  <span data-i18n="safetyStageAfter3">إذا لم يحضر الطرف الآخر أو واجهتك مشكلة جوهرية، سجّل بلاغاً قبل
+                    تأكيد الاكتمال.</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- Report CTA Banner -->
+          <div
+            class="p-6 rounded-3xl bg-amber-50 border border-amber-200/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <div
+                class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-amber-950 text-base" data-i18n="reportCardTitle">هل واجهت مشكلة أو سلوكاً
+                  مخالفاً؟</h4>
+                <p class="text-xs text-amber-900/80" data-i18n="reportCardDesc">أبلغ الإشراف المحلي مباشرة وسيقوم فريق
+                  المراجعة بمعالجة البلاغ فوراً.</p>
+              </div>
+            </div>
+            <button onclick="app.openReportModal()"
+              class="px-5 py-2.5 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition shadow-sm shrink-0 flex items-center gap-2">
+              <i data-lucide="flag" class="w-4 h-4"></i>
+              <span data-i18n="openReportModalBtn">تقديم بلاغ فوري</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 6: LOCAL MODERATION PANEL                  -->
+        <!-- ============================================== -->
+        <section id="tab-moderation" class="tab-content hidden space-y-6">
+          <div class="space-y-1">
+            <h2 class="text-2xl font-black text-stone-900" data-i18n="modPageTitle">لوحة الإشراف على البلاغات (تجريبية)
+            </h2>
+            <p class="text-xs md:text-sm text-stone-500" data-i18n="modPageDesc">لوحة تحكم محلية لمراجعة البلاغات
+              المقدمة من المستخدمين واتخاذ إجراءات الحل أو التجاهل.</p>
+          </div>
+
+          <!-- Red Developer / Security Warning Banner -->
+          <div
+            class="p-4 rounded-2xl bg-red-50 border-2 border-red-300 text-red-950 flex items-start gap-3 text-xs md:text-sm shadow-sm">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <span class="leading-relaxed" data-i18n="modWarningBanner">
+              تحذير أمني للمطورين: هذه لوحة إشراف محلية مفتوحة لأغراض عرض النموذج الأولي (Prototype). في البيئة
+              الحقيقية، يجب حمايتها بنظام صلاحيات مشفر (RBAC) وخوادم موثوقة.
+            </span>
+          </div>
+
+          <!-- Status Filter Tabs -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-stone-200 text-xs font-bold">
+            <button data-mod-status="all"
+              class="mod-filter-btn px-4 py-2 rounded-xl bg-[#1B4D3E] text-white shadow-sm transition flex items-center gap-1.5 whitespace-nowrap">
+              <span data-i18n="modFilterAll">كافة البلاغات</span>
+              <span id="mod-count-all" class="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">2</span>
+            </button>
+            <button data-mod-status="open"
+              class="mod-filter-btn px-4 py-2 rounded-xl text-stone-600 hover:bg-stone-100 transition flex items-center gap-1.5 whitespace-nowrap">
+              <span data-i18n="modFilterOpen">بلاغات مفتوحة</span>
+              <span id="mod-count-open" class="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-200">1</span>
+            </button>
+            <button data-mod-status="resolved"
+              class="mod-filter-btn px-4 py-2 rounded-xl text-stone-600 hover:bg-stone-100 transition flex items-center gap-1.5 whitespace-nowrap">
+              <span data-i18n="modFilterResolved">تم حلها</span>
+              <span id="mod-count-resolved" class="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-200">1</span>
+            </button>
+            <button data-mod-status="dismissed"
+              class="mod-filter-btn px-4 py-2 rounded-xl text-stone-600 hover:bg-stone-100 transition flex items-center gap-1.5 whitespace-nowrap">
+              <span data-i18n="modFilterDismissed">تم تجاهلها</span>
+              <span id="mod-count-dismissed" class="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-200">0</span>
+            </button>
+          </div>
+
+          <!-- Reports Container -->
+          <div id="moderation-reports-container" class="space-y-4">
+            <!-- Populated via app.renderModeration() -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 7: ABOUT & RESET STATE                     -->
+        <!-- ============================================== -->
+        <section id="tab-about" class="tab-content hidden space-y-8">
+          <div class="space-y-1">
+            <h2 class="text-2xl font-black text-stone-900" data-i18n="aboutPageTitle">عن النموذج الأولي والحدود التقنية
+            </h2>
+            <p class="text-xs md:text-sm text-stone-500" data-i18n="aboutPageDesc">الوثيقة التقنية، فلسفة بنك الوقت،
+              وإدارة البيانات المحلية لهذا المشروع.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- What is Mahara -->
+            <div class="glass-card p-6 rounded-2xl space-y-3">
+              <div class="flex items-center gap-2 text-[#1B4D3E] font-bold text-base">
+                <i data-lucide="book-marked" class="w-5 h-5"></i>
+                <h3 data-i18n="aboutCard1Title">ما هو مشروع مهارة؟</h3>
+              </div>
+              <p class="text-xs md:text-sm text-stone-600 leading-relaxed" data-i18n="aboutCard1Text">
+                مهارة هو نموذج أولي تطبيقي لبنك الوقت (Time Bank) المحلي لمشاركة المعرفة دون أية وساطة مالية. المبدأ
+                الأساسي: ساعة من وقتك في تعليم الآخرين تعادل ساعة من وقت شخص آخر ليعلمك ما تحتاجه.
+              </p>
+            </div>
+
+            <!-- Explicit Limitations -->
+            <div class="glass-card p-6 rounded-2xl space-y-3">
+              <div class="flex items-center gap-2 text-amber-700 font-bold text-base">
+                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                <h3 data-i18n="aboutCard2Title">الحدود التقنية الصريحة (Explicit Limitations)</h3>
+              </div>
+              <ul class="text-xs md:text-sm text-stone-600 space-y-2 list-disc list-inside leading-relaxed">
+                <li data-i18n="aboutCard2Point1">البيانات مخزنة فقط في متصفحك الحالي عبر الـ localStorage ولا تُرسل لأي
+                  سيرفر.</li>
+                <li data-i18n="aboutCard2Point2">لا توجد بوابات دفع، ولا رسوم، ولا اشتراكات حقيقية.</li>
+                <li data-i18n="aboutCard2Point3">لا توجد خوارزميات مصادقة أو تسجيل دخول حقيقي؛ الحساب المعروض هو حساب
+                  محلي تجريبي.</li>
+                <li data-i18n="aboutCard2Point4">لوحة الإشراف محلية وغير محمية، صُممت لإثبات سير العمل فقط.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Reset Prototype State Section -->
+          <div class="glass-card p-6 rounded-3xl border-red-200 bg-red-50/30 space-y-4">
+            <div>
+              <h3 class="font-bold text-red-900 text-base" data-i18n="aboutResetTitle">إعادة ضبط النموذج التجريبي</h3>
+              <p class="text-xs text-stone-600 mt-1" data-i18n="aboutResetDesc">إذا أردت مسح كافة التغييرات والطلبات
+                والبيانات التي أضفتها واسترجاع الحالة الأصلية النموذجية للمشروع، اضغط على الزر أدناه.</p>
+            </div>
+
+            <button onclick="app.openResetModal()"
+              class="px-5 py-2.5 rounded-xl bg-red-700 text-white text-xs font-bold hover:bg-red-800 transition shadow-sm flex items-center gap-2">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              <span data-i18n="aboutResetBtn">إعادة ضبط كافة البيانات المحلية</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 8: PROJECT KNOWLEDGE & NOTEBOOK SOURCES    -->
+        <!-- ============================================== -->
+        <section id="tab-notebook" class="tab-content hidden space-y-8">
+          <div class="space-y-1">
+            <div
+              class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200">
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+              <span>Master Blueprint & Pitch Documentation</span>
+            </div>
+            <h2 class="text-2xl font-black text-stone-900" data-i18n="notebookTitle">دفتر المعرفة والوثائق المرجعية
+              لمشروع مَهارة</h2>
+            <p class="text-xs md:text-sm text-stone-500" data-i18n="notebookSubtitle">المخطط الهيكلي، عرض الاستثمار
+              المكون من 10 شرائح، ودليل قواعد بنك الوقت.</p>
+          </div>
+
+          <!-- Sub-tab buttons inside Notebook -->
+          <div class="flex items-center gap-2 border-b border-stone-200 pb-2 text-xs font-bold overflow-x-auto">
+            <button id="nb-subtab-btn-pitch" onclick="app.setNotebookSubtab('pitch')"
+              class="nb-subtab-btn px-4 py-2 rounded-xl bg-[#1B4D3E] text-white shadow-sm transition flex items-center gap-2 whitespace-nowrap">
+              <i data-lucide="presentation" class="w-4 h-4"></i>
+              <span data-i18n="notebookSectionPitch">العرض التعريفي للمشروع (10-Slide Pitch)</span>
+            </button>
+            <button id="nb-subtab-btn-rules" onclick="app.setNotebookSubtab('rules')"
+              class="nb-subtab-btn px-4 py-2 rounded-xl text-stone-600 hover:bg-stone-100 transition flex items-center gap-2 whitespace-nowrap">
+              <i data-lucide="scale" class="w-4 h-4"></i>
+              <span data-i18n="notebookSectionRules">قواعد وبروتوكول بنك الوقت</span>
+            </button>
+            <button id="nb-subtab-btn-notice" onclick="app.setNotebookSubtab('notice')"
+              class="nb-subtab-btn px-4 py-2 rounded-xl text-stone-600 hover:bg-stone-100 transition flex items-center gap-2 whitespace-nowrap">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+              <span data-i18n="notebookSectionNotice">الحدود التقنية والميثاق الأخلاقي</span>
+            </button>
+          </div>
+
+          <!-- SUB-VIEW 1: 10-SLIDE PITCH DECK -->
+          <div id="nb-view-pitch" class="space-y-6">
+            <div
+              class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-3">
+              <i data-lucide="sparkles" class="w-5 h-5 text-emerald-700 shrink-0"></i>
+              <span>هيكل العرض الاستثماري المكون من 10 شرائح معتمد وفق المعايير العالمية لتبادل المعرفة
+                اللامركزية.</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Slide 1 -->
+              <div class="glass-card p-5 rounded-2xl border-stone-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-stone-100 text-stone-700">Slide
+                    1</span>
+                  <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600"></i>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm" data-i18n="pitchSlide1Title">١. المشكلة: الحواجز المالية
+                </h4>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="pitchSlide1Desc">ارتفاع تكاليف الدورات
+                  وانعدام التكافؤ المالي يحرم الملايين من مشاركة شغفهم وتعلّم ما يحتاجونه.</p>
+              </div>
+
+              <!-- Slide 2 -->
+              <div class="glass-card p-5 rounded-2xl border-stone-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">Slide
+                    2</span>
+                  <i data-lucide="hourglass" class="w-4 h-4 text-emerald-600"></i>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm" data-i18n="pitchSlide2Title">٢. الحل: بنك الوقت (1h = 1h)
+                </h4>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="pitchSlide2Desc">إلغاء الوساطة المالية
+                  بالكامل؛ استثمار الوقت كعملة موحدة وعادلة: ساعة تعلّم يقابلها ساعة تدريس.</p>
+              </div>
+
+              <!-- Slide 3 -->
+              <div class="glass-card p-5 rounded-2xl border-stone-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800">Slide
+                    3</span>
+                  <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm" data-i18n="pitchSlide3Title">٣. الجمهور وسوق المعرفة</h4>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="pitchSlide3Desc">الطلاب، الهواة، المبرمجون،
+                  الحرفيون، والمهنيون الراغبون في تبادل المهارات بمرونة.</p>
+              </div>
+
+              <!-- Slide 4 -->
+              <div class="glass-card p-5 rounded-2xl border-stone-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">Slide
+                    4</span>
+                  <i data-lucide="cpu" class="w-4 h-4 text-amber-600"></i>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm" data-i18n="pitchSlide4Title">٤. المحرك والخصائص الأساسية
+                </h4>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="pitchSlide4Desc">استكشاف المهارات، نظام حجز
+                  الضمان (Time-Escrow)، الجلسات المباشرة عبر WebRTC، والمحفظة المحلية.</p>
+              </div>
+
+              <!-- Slide 5 -->
+              <div class="glass-card p-5 rounded-2xl border-stone-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-100 text-teal-800">Slide
+                    5</span>
+                  <i data-lucide="code-2" class="w-4 h-4 text-teal-600"></i>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm" data-i18n="pitchSlide5Title">٥. البنية التقنية
+                  (Local-First)</h4>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="pitchSlide5Desc">تطبيق صفحة واحدة (SPA)
+                  بدون خوادم يعتمد بالكامل على localStorage و WebRTC Mesh، خفيف وسريع وصفر تكاليف.</p>
+              </div>
+
+              <!-- Slide 6 -->
+              <div class="glass-card p-5 rounded-2xl border-stone-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">Slide
+                    6</span>
+                  <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm" data-i18n="pitchSlide6Title">٦. الأمان وبناء الثقة</h4>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="pitchSlide6Desc">بروتوكول سلامة ثلاثي
+                  المراحل (قبل، أثناء، وبعد الجلسة) لضمان بيئة تعليمية محترمة ومحمية.</p>
+              </div>
+
+              <!-- Slide 7 -->
+              <div class="glass-card p-5 rounded-2xl border-stone-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800">Slide
+                    7</span>
+                  <i data-lucide="gavel" class="w-4 h-4 text-purple-600"></i>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm" data-i18n="pitchSlide7Title">٧. الإشراف وحل النزاعات</h4>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="pitchSlide7Desc">نظام إبلاغ فوري يغذي لوحة
+                  المراجعة للتحقق من المخالفات واسترداد ساعات الضمان فورياً عند النزاع.</p>
+              </div>
+
+              <!-- Slide 8 -->
+              <div class="glass-card p-5 rounded-2xl border-stone-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800">Slide
+                    8</span>
+                  <i data-lucide="briefcase" class="w-4 h-4 text-indigo-600"></i>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm" data-i18n="pitchSlide8Title">٨. الاستدامة والشراكات</h4>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="pitchSlide8Desc">الاعتماد على المنظمات غير
+                  الربحية، الجامعات، والبرامج المجتمعية لدعم بنوك الوقت وتبادل الكفاءات.</p>
+              </div>
+
+              <!-- Slide 9 -->
+              <div class="glass-card p-5 rounded-2xl border-stone-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">Slide
+                    9</span>
+                  <i data-lucide="milestone" class="w-4 h-4 text-amber-600"></i>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm" data-i18n="pitchSlide9Title">٩. خارطة الطريق (Roadmap)</h4>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="pitchSlide9Desc">من النموذج المحلي
+                  (Prototype) إلى التشفير الطرفي، وتطبيقات الهواتف، والتوسع الإقليمي متعدد اللغات.</p>
+              </div>
+
+              <!-- Slide 10 -->
+              <div class="glass-card p-5 rounded-2xl border-stone-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">Slide
+                    10</span>
+                  <i data-lucide="target" class="w-4 h-4 text-emerald-600"></i>
+                </div>
+                <h4 class="font-bold text-stone-900 text-sm" data-i18n="pitchSlide10Title">١٠. الرؤية وفريق العمل</h4>
+                <p class="text-xs text-stone-600 leading-relaxed" data-i18n="pitchSlide10Desc">دمقرطة المعرفة وجعل تبادل
+                  المهارات حقاً متاحاً لكل إنسان دون قيد مالي أو جغرافي.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 2: TIME-BANKING RULES & PROTOCOLS -->
+          <div id="nb-view-rules" class="hidden space-y-6">
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+              <h3 class="font-bold text-stone-900 text-base flex items-center gap-2">
+                <i data-lucide="workflow" class="w-5 h-5 text-[#1B4D3E]"></i>
+                <span>دورة حياة رصيد الوقت والضمان (Time-Token Lifecycle)</span>
+              </h3>
+
+              <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
+                <div class="p-3 rounded-xl bg-stone-50 border border-stone-200 text-center space-y-1">
+                  <span class="font-bold text-stone-900 block">١. الإيداع الأولي</span>
+                  <p class="text-stone-500 text-[11px]">شحن تجريبي أو اكتساب ساعات من تعليم الآخرين.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-center space-y-1">
+                  <span class="font-bold text-amber-900 block">٢. حجز الضمان (Escrow)</span>
+                  <p class="text-amber-800 text-[11px]">تجميد الساعات المطلوبة للجلسة دون استهلاك.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-blue-50 border border-blue-200 text-center space-y-1">
+                  <span class="font-bold text-blue-900 block">٣. الجلسة (WebRTC)</span>
+                  <p class="text-blue-800 text-[11px]">لقاء افتراضي مباشر مشفر P2P لتنفيذ التعلّم.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center space-y-1">
+                  <span class="font-bold text-emerald-900 block">٤. التسوية والإفراج</span>
+                  <p class="text-emerald-800 text-[11px]">تحويل الساعات إلى رصيد المعلم بعد اكتمال الجلسة.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-center space-y-1">
+                  <span class="font-bold text-rose-900 block">٥. حل النزاع أو الإلغاء</span>
+                  <p class="text-rose-800 text-[11px]">استرداد فوري وتلقائي للساعات إذا أُلغيت الجلسة.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div class="glass-card p-5 rounded-2xl space-y-2">
+                <h4 class="font-bold text-stone-900 text-sm">مبدأ تكافؤ الساعات</h4>
+                <p class="text-stone-600 leading-relaxed">ساعة البرمجة المتقدمة تساوي تماماً ساعة الخط العربي أو ساعة
+                  الطبخ أو اللغات. في بنك الوقت، كل إنسان يمتلك قيمة حقيقية متكافئة.</p>
+              </div>
+              <div class="glass-card p-5 rounded-2xl space-y-2">
+                <h4 class="font-bold text-stone-900 text-sm">انعدام الفوائد والتضخم</h4>
+                <p class="text-stone-600 leading-relaxed">لا توجد رسوم تحويل، ولا فوائد، ولا تخفيض زمني. الساعات المسجلة
+                  في محفظتك تبقى محفوظة دون اقتطاع.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 3: TECHNICAL SOP & ETHICS CHARTER -->
+          <div id="nb-view-notice" class="hidden space-y-6">
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+              <div class="flex items-center gap-2 text-amber-700 font-bold text-base">
+                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                <span>الميثاق الفني والأخلاقي للنموذج الأولي</span>
+              </div>
+
+              <div class="space-y-3 text-xs text-stone-600 leading-relaxed">
+                <p><strong>١. السيادة المحلية للبيانات (Local-First Storage):</strong> كافة التعديلات، السجلات،
+                  البلاغات، والمهارات المضافة تُحفظ حصرياً في ذاكرة التخزين المحلية للمتصفح (<code
+                    class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-800 font-mono">localStorage</code>). لا يوجد أي
+                  تسريب لبيانات المستخدم إلى جهات خارجية.</p>
+                <p><strong>٢. الأمان اللامركزي في الاتصال (WebRTC Mesh):</strong> يتم تدفق الصوت والصورة مباشرة بين
+                  المتصفحات (Peer-to-Peer) دون المرور عبر خوادم تسجيل وسيطة، مع توفير بث افتراضي مولّد داخلياً للأجهزة
+                  التي لا تدعم الكاميرات.</p>
+                <p><strong>٣. متطلبات الانتقال إلى بيئة الإنتاج الحقيقية (Production Readiness):</strong></p>
+                <ul class="list-disc list-inside space-y-1 ps-2 text-stone-500">
+                  <li>استبدال لوحة الإشراف المفتوحة بنظام تصاريح وتشفير مشدد قائم على الأدوار (Role-Based Access
+                    Control).</li>
+                  <li>ربط محرك WebRTC بخوادم تأشير (Signaling WebSocket) وخوادم STUN/TURN لاجتياز جدران الحماية المعقدة.
+                  </li>
+                  <li>تطبيق تشفير التخزين للبيانات الحساسة وتوثيق الهويات التعليمية.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="mt-auto border-t border-stone-200/80 py-4 px-8 text-center text-xs text-stone-400 bg-white/50">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto">
+          <span>مهارة (Skill-Swap) • نموذج واجهة تفاعلي محلي يعتمد بنك الوقت</span>
+          <span class="font-mono text-[11px]">v1.0.0 (Clean Frontend Prototype)</span>
+        </div>
+      </footer>
+
+    </div>
+
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: SKILL DETAIL MODAL                      -->
+  <!-- ============================================== -->
+  <div id="skill-detail-modal"
+    class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div
+      class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl modal-enter border border-stone-200 relative"
+      id="skill-modal-content">
+      <!-- Injected by app.openSkillModal() -->
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: REQUEST SESSION (BOOKING ENGINE FLOW)   -->
+  <!-- ============================================== -->
+  <div id="booking-modal"
+    class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl modal-enter border border-stone-200">
+
+      <!-- Header -->
+      <div class="p-6 bg-stone-50 border-b border-stone-200 relative">
+        <button onclick="app.closeModal('booking-modal')"
+          class="absolute top-5 end-5 text-stone-400 hover:text-stone-700 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <h3 class="font-black text-lg text-stone-900" data-i18n="bookingModalTitle">طلب جلسة تعليمية جديدة</h3>
+        <p class="text-xs text-stone-500 mt-0.5" data-i18n="bookingModalDesc">سيتم حجز تكلفة الجلسة في حساب الضمان
+          (Escrow) ولن تُستهلك إلا بعد إتمام الجلسة.</p>
+      </div>
+
+      <!-- Form Body -->
+      <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+
+        <!-- Skill Badge Preview -->
+        <div class="p-3 rounded-xl bg-[#EBF7F2] border border-[#C8E6C9] flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-[#1B4D3E] text-white flex items-center justify-center shrink-0">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div class="overflow-hidden">
+            <h4 id="booking-skill-title" class="font-bold text-stone-900 text-sm truncate">اسم المهارة</h4>
+            <p id="booking-instructor-name" class="text-xs text-stone-500 truncate">اسم المدرب</p>
+          </div>
+        </div>
+
+        <!-- Date & Time Pickers -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1" data-i18n="bookingSelectDate">تاريخ الجلسة
+              المقترح:</label>
+            <input type="date" id="booking-date"
+              class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#1B4D3E]/30 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1" data-i18n="bookingSelectTime">الوقت
+              المقترح:</label>
+            <input type="time" id="booking-time" value="18:00"
+              class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#1B4D3E]/30 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Duration Picker -->
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1" data-i18n="bookingSelectDuration">المدة
+            المطلوبة:</label>
+          <select id="booking-duration"
+            class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#1B4D3E]/30 focus:outline-none">
+            <option value="1">1 ساعة (1 رصيد زمني)</option>
+            <option value="2">2 ساعة (2 رصيد زمني)</option>
+            <option value="3">3 ساعات (3 رصيد زمني)</option>
+          </select>
+        </div>
+
+        <!-- Notes -->
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1" data-i18n="bookingNotes">ملاحظات إضافية للمدرب
+            (اختياري):</label>
+          <textarea id="booking-notes" rows="2" data-i18n-placeholder="bookingNotesPlaceholder"
+            placeholder="مثال: أريد التركيز على النطق، أو لدي خلفية بسيطة..."
+            class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:ring-2 focus:ring-[#1B4D3E]/30 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Cost Breakdown vs. Balance -->
+        <div class="p-4 rounded-xl bg-stone-50 border border-stone-200/80 space-y-2 text-xs">
+          <div class="font-bold text-stone-800 pb-1 border-b border-stone-200" data-i18n="bookingCostBreakdown">تفاصيل
+            التكلفة والرصيد:</div>
+          <div class="flex items-center justify-between text-stone-600">
+            <span data-i18n="bookingCurrentBalance">رصيدك المتاح الحالي:</span>
+            <strong id="booking-calc-current" class="text-stone-900">105 ساعات</strong>
+          </div>
+          <div class="flex items-center justify-between text-amber-700">
+            <span data-i18n="bookingSessionCost">تكلفة الجلسة (الساعات المطلوبة):</span>
+            <strong id="booking-calc-cost">-1 ساعة</strong>
+          </div>
+          <div class="flex items-center justify-between text-stone-800 pt-1 border-t border-stone-200 font-bold">
+            <span data-i18n="bookingRemainingBalance">الرصيد المتبقي بعد الحجز:</span>
+            <strong id="booking-calc-remaining" class="text-[#1B4D3E]">104 ساعات</strong>
+          </div>
+        </div>
+
+        <!-- Insufficient Balance Error Box -->
+        <div id="booking-error-box"
+          class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium leading-relaxed hidden">
+          <!-- Text set dynamically -->
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="flex items-center gap-3 pt-2">
+          <button onclick="app.closeModal('booking-modal')"
+            class="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50 transition"
+            data-i18n="bookingCancel">
+            إلغاء
+          </button>
+          <button id="booking-submit-btn" onclick="app.confirmBooking()"
+            class="flex-1 py-2.5 rounded-xl bg-[#1B4D3E] text-white text-xs font-bold hover:bg-[#143B30] transition shadow-md flex items-center justify-center gap-1.5"
+            data-i18n="bookingSubmit">
+            تأكيد طلب الجلسة وحجز الساعات
+          </button>
+        </div>
+
+        <!-- Direct Add Hours helper button if balance low -->
+        <div class="text-center pt-1">
+          <button onclick="app.add50Hours()" class="text-[11px] font-bold text-amber-700 hover:underline"
+            data-i18n="bookingGoToWallet">
+            + شحن رصيد تجريبي (+50 ساعة)
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: REPORT AN ISSUE FORM                    -->
+  <!-- ============================================== -->
+  <div id="report-modal"
+    class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl modal-enter border border-stone-200">
+
+      <div class="p-6 bg-red-50 border-b border-red-100 relative">
+        <button onclick="app.closeModal('report-modal')"
+          class="absolute top-5 end-5 text-stone-400 hover:text-stone-700 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <h3 class="font-black text-lg text-red-950 flex items-center gap-2">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+          <span data-i18n="reportModalTitle">نموذج الإبلاغ عن مشكلة</span>
+        </h3>
+        <p class="text-xs text-red-900/80 mt-1" data-i18n="reportModalDesc">يتم إرسال هذا البلاغ مباشرة إلى لوحة الإشراف
+          المحلية للتسجيل والمعالجة.</p>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1" data-i18n="reportReporterName">اسمك
+            (المُبلّغ):</label>
+          <input type="text" id="report-name" value="سامي الزهراني"
+            class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1" data-i18n="reportSelectSession">الجلسة المعنية
+            (اختياري):</label>
+          <select id="report-session-select"
+            class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1" data-i18n="reportCategory">نوع المخالفة أو
+              المشكلة:</label>
+            <select id="report-category"
+              class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium">
+              <option value="behavior" data-i18n="reportCatBehavior">سلوك غير لائق أو إساءة</option>
+              <option value="no-show" data-i18n="reportCatNoShow">تخلف الطرف الآخر عن الحضور</option>
+              <option value="quality" data-i18n="reportCatQuality">محتوى ضعيف جداً أو مضلل</option>
+              <option value="tech" data-i18n="reportCatTech">مشكلة تقنية أو خلل في الجلسة</option>
+              <option value="other" data-i18n="reportCatOther">أخرى</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1" data-i18n="reportSeverity">مستوى الخطورة:</label>
+            <select id="report-severity"
+              class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium">
+              <option value="low" data-i18n="reportSeverityLow">منخفضة (ملاحظة عادية)</option>
+              <option value="medium" selected data-i18n="reportSeverityMedium">متوسطة (تأخير أو سوء تفاهم)</option>
+              <option value="high" data-i18n="reportSeverityHigh">حرجة (إساءة صريحة أو احتيال)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1" data-i18n="reportDescription">تفاصيل
+            البلاغ:</label>
+          <textarea id="report-desc" rows="3" data-i18n-placeholder="reportDescPlaceholder"
+            placeholder="يرجى ذكر ما حدث بوضوح مع ذكر التوقيت إن أمكن..."
+            class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:ring-2 focus:ring-red-500/20 focus:outline-none"></textarea>
+        </div>
+
+        <div class="flex items-center gap-3 pt-3">
+          <button onclick="app.closeModal('report-modal')"
+            class="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50 transition"
+            data-i18n="reportCancel">
+            إلغاء
+          </button>
+          <button onclick="app.submitReport()"
+            class="flex-1 py-2.5 rounded-xl bg-red-700 text-white text-xs font-bold hover:bg-red-800 transition shadow-md flex items-center justify-center gap-1.5"
+            data-i18n="reportSubmit">
+            إرسال البلاغ للإشراف
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: CONFIRM PROTOTYPE RESET                 -->
+  <!-- ============================================== -->
+  <div id="reset-confirm-modal"
+    class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div
+      class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl modal-enter border border-stone-200 p-6 space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center mx-auto">
+        <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+      </div>
+      <div class="text-center space-y-2">
+        <h3 class="font-bold text-stone-900 text-lg" data-i18n="confirmResetTitle">تأكيد إعادة الضبط؟</h3>
+        <p class="text-xs text-stone-500 leading-relaxed" data-i18n="confirmResetText">
+          سيتم حذف كافة الجلسات والبلاغات وتعديلات الرصيد واستعادة البيانات التجريبية الافتراضية. هل تريد المتابعة؟
+        </p>
+      </div>
+      <div class="flex items-center gap-3 pt-2">
+        <button onclick="app.closeModal('reset-confirm-modal')"
+          class="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-700 text-xs font-bold hover:bg-stone-50 transition"
+          data-i18n="confirmResetNo">
+          تراجع
+        </button>
+        <button onclick="app.closeModal('reset-confirm-modal'); app.resetStore()"
+          class="flex-1 py-2.5 rounded-xl bg-red-700 text-white text-xs font-bold hover:bg-red-800 transition shadow-md"
+          data-i18n="confirmResetYes">
+          نعم، أعد الضبط الآن
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: SHARE SKILL MODAL                       -->
+  <!-- ============================================== -->
+  <div id="share-skill-modal"
+    class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl modal-enter border border-stone-200">
+
+      <div class="p-6 bg-[#EBF7F2] border-b border-[#C8E6C9] relative">
+        <button onclick="app.closeModal('share-skill-modal')"
+          class="absolute top-5 end-5 text-stone-400 hover:text-stone-700 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <div class="flex items-center gap-2 text-[#1B4D3E] font-bold text-base mb-1">
+          <i data-lucide="share-2" class="w-5 h-5"></i>
+          <h3 data-i18n="shareModalTitle">مشاركة المهارة مع مجتمعك</h3>
+        </div>
+        <p class="text-xs text-stone-600" data-i18n="shareModalDesc">انسخ الرابط المباشر أو شارك المحتوى فوراً عبر
+          المنصات الاجتماعية.</p>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <!-- Target Skill Card Preview -->
+        <div class="p-3.5 rounded-xl bg-stone-50 border border-stone-200/80 flex items-center gap-3">
+          <img id="share-skill-img" src="" alt=""
+            class="w-12 h-12 rounded-lg object-cover border border-stone-200 shrink-0">
+          <div class="overflow-hidden">
+            <h4 id="share-skill-title" class="font-bold text-stone-900 text-xs sm:text-sm truncate">عنوان المهارة</h4>
+            <p id="share-skill-instructor" class="text-xs text-stone-500 truncate">المدرب</p>
+          </div>
+        </div>
+
+        <!-- Share URL Input & Copy Button -->
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1" data-i18n="shareCopyLink">الرابط المباشر:</label>
+          <div class="flex items-center gap-2">
+            <input type="text" id="share-skill-url" readonly
+              class="flex-1 px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono text-stone-600 select-all focus:outline-none">
+            <button onclick="app.copyShareSkillLink()"
+              class="px-4 py-2 rounded-xl bg-[#1B4D3E] text-white text-xs font-bold hover:bg-[#143B30] transition flex items-center gap-1.5 shrink-0 shadow-sm">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span data-i18n="shareCopyLink">نسخ</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Copy formatted payload button -->
+        <button onclick="app.copyShareSkillPayload()"
+          class="w-full py-2.5 px-3 rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-50 text-xs font-semibold transition flex items-center justify-center gap-2">
+          <i data-lucide="file-text" class="w-3.5 h-3.5 text-stone-500"></i>
+          <span data-i18n="shareCopyPayload">نسخ النص التعريفي للمهارة</span>
+        </button>
+
+        <!-- Social Buttons -->
+        <div class="pt-2 border-t border-stone-100">
+          <span class="block text-[11px] font-bold text-stone-400 mb-2 text-center">أو شارك مباشرة عبر:</span>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="app.shareViaSocial('whatsapp')"
+              class="py-2 px-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 text-xs font-bold transition flex items-center justify-center gap-1">
+              <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span>واتساب</span>
+            </button>
+            <button onclick="app.shareViaSocial('twitter')"
+              class="py-2 px-2 rounded-xl bg-stone-100 text-stone-800 border border-stone-200 hover:bg-stone-200 text-xs font-bold transition flex items-center justify-center gap-1">
+              <i data-lucide="twitter" class="w-3.5 h-3.5 text-stone-700"></i>
+              <span>إكس (X)</span>
+            </button>
+            <button onclick="app.shareViaSocial('telegram')"
+              class="py-2 px-2 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 text-xs font-bold transition flex items-center justify-center gap-1">
+              <i data-lucide="send" class="w-3.5 h-3.5 text-sky-600"></i>
+              <span>تيليجرام</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: SHARE SESSION SUMMARY MODAL             -->
+  <!-- ============================================== -->
+  <div id="share-session-modal"
+    class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl modal-enter border border-stone-200">
+
+      <div class="p-6 bg-blue-50 border-b border-blue-100 relative">
+        <button onclick="app.closeModal('share-session-modal')"
+          class="absolute top-5 end-5 text-stone-400 hover:text-stone-700 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <div class="flex items-center gap-2 text-blue-900 font-bold text-base mb-1">
+          <i data-lucide="file-check" class="w-5 h-5 text-blue-600"></i>
+          <h3 data-i18n="shareSessionModalTitle">مشاركة ملخص الجلسة التعليمية</h3>
+        </div>
+        <p class="text-xs text-blue-800/80" data-i18n="shareSessionModalDesc">انسخ ملخص تفاصيل الجلسة لمشاركته مع زميلك
+          أو لحفظه في مفكرتك.</p>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <!-- Formatted Summary Box -->
+        <textarea id="share-session-summary-text" rows="5" readonly
+          class="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono text-stone-700 leading-relaxed select-all focus:outline-none"></textarea>
+
+        <div class="flex items-center gap-2">
+          <button onclick="app.copySessionSummary()"
+            class="flex-1 py-2.5 px-4 rounded-xl bg-[#1B4D3E] text-white text-xs font-bold hover:bg-[#143B30] transition flex items-center justify-center gap-2 shadow-sm">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            <span data-i18n="shareCopySessionSummary">نسخ ملخص الجلسة</span>
+          </button>
+          <button onclick="app.shareSessionViaWhatsApp()"
+            class="py-2.5 px-4 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-1.5 shadow-sm">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <span>واتساب</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: WEBRTC LIVE LEARNING ROOM               -->
+  <!-- ============================================== -->
+  <div id="webrtc-modal"
+    class="fixed inset-0 z-50 bg-stone-950/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 hidden">
+    <div
+      class="bg-stone-900 text-white rounded-3xl max-w-5xl w-full h-[92vh] max-h-[820px] overflow-hidden shadow-2xl modal-enter border border-stone-800 flex flex-col">
+
+      <!-- Room Header -->
+      <div class="p-4 bg-stone-950 border-b border-stone-800 flex items-center justify-between gap-4 shrink-0">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <i data-lucide="video" class="w-5 h-5"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="flex items-center gap-2">
+              <h3 id="webrtc-session-title" class="font-bold text-sm sm:text-base text-white truncate"
+                data-i18n="webrtcRoomTitle">غرفة الجلسة التشاركية المباشرة</h3>
+              <span id="webrtc-status-pill"
+                class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 shrink-0">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="webrtc-status-text" data-i18n="webrtcConnected">متصل WebRTC P2P</span>
+              </span>
+            </div>
+            <p id="webrtc-instructor-info" class="text-xs text-stone-400 truncate">جلسة مباشرة</p>
+          </div>
+        </div>
+
+        <!-- Timer & Close -->
+        <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+          <div
+            class="bg-stone-800/80 px-3 py-1.5 rounded-xl border border-stone-700/60 flex items-center gap-2 text-xs font-mono text-emerald-300">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-stone-400"></i>
+            <span id="webrtc-room-timer">00:00:00</span>
+          </div>
+          <button onclick="app.closeWebRTCRoom()"
+            class="text-stone-400 hover:text-white p-2 rounded-xl hover:bg-stone-800 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Video & Chat Area -->
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 overflow-hidden relative">
+
+        <!-- Video Stage (3 cols on desktop) -->
+        <div class="lg:col-span-3 bg-stone-950 p-3 sm:p-4 flex flex-col justify-between relative overflow-hidden">
+
+          <!-- Notice banner if running in simulated mode or permissions -->
+          <div id="webrtc-notice"
+            class="hidden absolute top-4 inset-x-4 z-20 p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-xs flex items-center justify-between">
+            <span id="webrtc-notice-text" data-i18n="webrtcFallbackNotice">تنبيه: تم تفعيل البث الافتراضي التوضيحي
+              للجلسة (محاكاة WebRTC تفاعلية كاملة).</span>
+            <button onclick="document.getElementById('webrtc-notice').classList.add('hidden')"
+              class="text-amber-300 hover:text-white">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Video Grid -->
+          <div
+            class="flex-1 relative rounded-2xl overflow-hidden bg-stone-900 border border-stone-800/80 flex items-center justify-center">
+
+            <!-- Remote Peer Video (Primary) -->
+            <video id="webrtc-remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
+
+            <!-- Fallback Canvas if no real video stream -->
+            <canvas id="webrtc-remote-canvas" class="hidden w-full h-full object-cover"></canvas>
+
+            <!-- Remote Peer Label Overlay -->
+            <div
+              class="absolute bottom-3 start-3 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md text-xs font-semibold text-white/90 border border-white/10 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span id="webrtc-remote-name-label" data-i18n="webrtcRemoteTag">الطرف الآخر (المعلم)</span>
+            </div>
+
+            <!-- Picture-in-Picture Local User Video -->
+            <div
+              class="absolute top-4 end-4 w-32 sm:w-44 aspect-video rounded-xl overflow-hidden bg-stone-800 border-2 border-stone-700/80 shadow-2xl z-10">
+              <video id="webrtc-local-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+              <canvas id="webrtc-local-canvas" class="hidden w-full h-full object-cover"></canvas>
+              <div
+                class="absolute bottom-1.5 start-2 px-1.5 py-0.5 rounded bg-black/60 text-[10px] font-medium text-white/80">
+                <span data-i18n="webrtcLocalTag">أنت (المتعلم)</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Video Controls Toolbar -->
+          <div class="pt-3 flex items-center justify-center gap-2 sm:gap-3 flex-wrap z-10">
+            <!-- Mic Toggle -->
+            <button id="webrtc-btn-mic" onclick="app.toggleWebRTCMic()" title="كتم/تشغيل الميكروفون"
+              class="p-3 rounded-2xl bg-stone-800 hover:bg-stone-700 text-white transition border border-stone-700 shadow-sm">
+              <i id="webrtc-icon-mic" data-lucide="mic" class="w-5 h-5 text-emerald-400"></i>
+            </button>
+
+            <!-- Video Toggle -->
+            <button id="webrtc-btn-cam" onclick="app.toggleWebRTCCam()" title="تشغيل/إيقاف الكاميرا"
+              class="p-3 rounded-2xl bg-stone-800 hover:bg-stone-700 text-white transition border border-stone-700 shadow-sm">
+              <i id="webrtc-icon-cam" data-lucide="video" class="w-5 h-5 text-emerald-400"></i>
+            </button>
+
+            <!-- Screen Share -->
+            <button id="webrtc-btn-screen" onclick="app.toggleWebRTCScreenShare()" title="مشاركة الشاشة"
+              class="p-3 rounded-2xl bg-stone-800 hover:bg-stone-700 text-white transition border border-stone-700 shadow-sm">
+              <i id="webrtc-icon-screen" data-lucide="monitor-up" class="w-5 h-5 text-blue-400"></i>
+            </button>
+
+            <!-- Report Issue directly during call -->
+            <button onclick="app.openReportModal(app.activeWebRTCSessionId)" title="إبلاغ عن مشكلة أثناء الجلسة"
+              class="p-3 rounded-2xl bg-stone-800 hover:bg-stone-700 text-stone-300 transition border border-stone-700 shadow-sm">
+              <i data-lucide="shield-alert" class="w-5 h-5 text-amber-400"></i>
+            </button>
+
+            <!-- Complete and Release Escrow -->
+            <button onclick="app.completeSessionFromWebRTC()"
+              class="px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-lg flex items-center gap-2">
+              <i data-lucide="check-check" class="w-4 h-4"></i>
+              <span data-i18n="webrtcCompleteAndRelease">إنهاء الجلسة وصرف ساعات الضمان</span>
+            </button>
+
+            <!-- Leave Call -->
+            <button onclick="app.closeWebRTCRoom()"
+              class="px-4 py-3 rounded-2xl bg-red-600/90 hover:bg-red-700 text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+              <i data-lucide="phone-off" class="w-4 h-4"></i>
+              <span data-i18n="webrtcLeaveRoom">مغادرة الغرفة</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- In-Call P2P Chat Sidebar (1 col on desktop) -->
+        <div class="hidden lg:flex flex-col bg-stone-900 border-s border-stone-800 h-full">
+          <div
+            class="p-3 bg-stone-950/80 border-b border-stone-800 text-xs font-bold text-stone-300 flex items-center gap-2">
+            <i data-lucide="message-square" class="w-4 h-4 text-emerald-400"></i>
+            <span data-i18n="webrtcChatTitle">المحادثة الفورية (P2P DataChannel)</span>
+          </div>
+
+          <div id="webrtc-chat-messages" class="flex-1 p-3 overflow-y-auto space-y-2 text-xs">
+            <!-- Messages stream here -->
+          </div>
+
+          <div class="p-3 bg-stone-950 border-t border-stone-800 flex items-center gap-2">
+            <input type="text" id="webrtc-chat-input" data-i18n-placeholder="webrtcChatPlaceholder"
+              placeholder="اكتب رسالة فورية للطرف الآخر..."
+              class="flex-1 px-3 py-2 bg-stone-800 border border-stone-700 rounded-xl text-xs text-white placeholder-stone-500 focus:outline-none focus:border-emerald-500"
+              onkeydown="if(event.key === 'Enter') app.sendWebRTCMessage()">
+            <button onclick="app.sendWebRTCMessage()"
+              class="p-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition">
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- APPLICATION JAVASCRIPT FILES -->
+  <script src="js/translations.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+
+</html>
